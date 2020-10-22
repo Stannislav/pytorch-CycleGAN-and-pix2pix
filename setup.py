@@ -13,5 +13,14 @@ setup(
         "torch>=1.4.0",
         "torchvision>=0.5.0",
         "visdom>=0.1.8.8",
-    ]
+    ],
+    extras_require={
+        "dev": [
+            "black",
+            "flake8",
+            "ipywidgets",
+            "isort",
+            "jupyterlab",
+        ]
+    }
 )
