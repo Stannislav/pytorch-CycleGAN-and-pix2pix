@@ -33,13 +33,13 @@ class BaseOptions:
             help="name of the experiment. It decides where to store samples and models",
         )
         parser.add_argument(
-            "--gpu_ids",
+            "--gpu-ids",
             type=str,
             default="0",
             help="gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU",
         )
         parser.add_argument(
-            "--checkpoints_dir",
+            "--checkpoints-dir",
             type=str,
             default="./checkpoints",
             help="models are saved here",
@@ -52,13 +52,13 @@ class BaseOptions:
             help="chooses which model to use. [cycle_gan | pix2pix | test | colorization]",
         )
         parser.add_argument(
-            "--input_nc",
+            "--input-nc",
             type=int,
             default=3,
             help="# of input image channels: 3 for RGB and 1 for grayscale",
         )
         parser.add_argument(
-            "--output_nc",
+            "--output-nc",
             type=int,
             default=3,
             help="# of output image channels: 3 for RGB and 1 for grayscale",
@@ -88,7 +88,7 @@ class BaseOptions:
             help="specify generator architecture [resnet_9blocks | resnet_6blocks | unet_256 | unet_128]",
         )
         parser.add_argument(
-            "--n_layers_D", type=int, default=3, help="only used if netD==n_layers"
+            "--n-layers-D", type=int, default=3, help="only used if netD==n_layers"
         )
         parser.add_argument(
             "--norm",
@@ -97,23 +97,23 @@ class BaseOptions:
             help="instance normalization or batch normalization [instance | batch | none]",
         )
         parser.add_argument(
-            "--init_type",
+            "--init-type",
             type=str,
             default="normal",
             help="network initialization [normal | xavier | kaiming | orthogonal]",
         )
         parser.add_argument(
-            "--init_gain",
+            "--init-gain",
             type=float,
             default=0.02,
             help="scaling factor for normal, xavier and orthogonal.",
         )
         parser.add_argument(
-            "--no_dropout", action="store_true", help="no dropout for the generator"
+            "--no-dropout", action="store_true", help="no dropout for the generator"
         )
         # dataset parameters
         parser.add_argument(
-            "--dataset_mode",
+            "--dataset-mode",
             type=str,
             default="unaligned",
             help="chooses how datasets are loaded. [unaligned | aligned | single | colorization]",
@@ -122,24 +122,24 @@ class BaseOptions:
             "--direction", type=str, default="AtoB", help="AtoB or BtoA"
         )
         parser.add_argument(
-            "--serial_batches",
+            "--serial-batches",
             action="store_true",
             help="if true, takes images in order to make batches, otherwise takes them randomly",
         )
         parser.add_argument(
-            "--num_threads", default=4, type=int, help="# threads for loading data"
+            "--num-threads", default=4, type=int, help="# threads for loading data"
         )
         parser.add_argument(
-            "--batch_size", type=int, default=1, help="input batch size"
+            "--batch-size", type=int, default=1, help="input batch size"
         )
         parser.add_argument(
-            "--load_size", type=int, default=286, help="scale images to this size"
+            "--load-size", type=int, default=286, help="scale images to this size"
         )
         parser.add_argument(
-            "--crop_size", type=int, default=256, help="then crop to this size"
+            "--crop-size", type=int, default=256, help="then crop to this size"
         )
         parser.add_argument(
-            "--max_dataset_size",
+            "--max-dataset-size",
             type=int,
             default=float("inf"),
             help="Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.",
@@ -151,12 +151,12 @@ class BaseOptions:
             help="scaling and cropping of images at load time [resize_and_crop | crop | scale_width | scale_width_and_crop | none]",
         )
         parser.add_argument(
-            "--no_flip",
+            "--no-flip",
             action="store_true",
             help="if specified, do not flip the images for data augmentation",
         )
         parser.add_argument(
-            "--display_winsize",
+            "--display-winsize",
             type=int,
             default=256,
             help="display window size for both visdom and HTML",
@@ -169,7 +169,7 @@ class BaseOptions:
             help="which epoch to load? set to latest to use latest cached model",
         )
         parser.add_argument(
-            "--load_iter",
+            "--load-iter",
             type=int,
             default="0",
             help="which iteration to load? if load_iter > 0, the code will load models by iter_[load_iter]; otherwise, the code will load models by [epoch]",
@@ -188,7 +188,7 @@ class BaseOptions:
         self.initialized = True
         return parser
 
-    def gather_options(self):
+    def gather_options(self, args=None):
         """Initialize our parser with basic options(only once).
         Add additional model-specific and dataset-specific options.
         These options are defined in the <modify_commandline_options> function
@@ -201,13 +201,13 @@ class BaseOptions:
             parser = self.initialize(parser)
 
         # get the basic options
-        opt, _ = parser.parse_known_args()
+        opt, _ = parser.parse_known_args(args)
 
         # modify model-related parser options
         model_name = opt.model
         model_option_setter = models.get_option_setter(model_name)
         parser = model_option_setter(parser, self.isTrain)
-        opt, _ = parser.parse_known_args()  # parse again with new defaults
+        opt, _ = parser.parse_known_args(args)  # parse again with new defaults
 
         # modify dataset-related parser options
         dataset_name = opt.dataset_mode
@@ -216,7 +216,7 @@ class BaseOptions:
 
         # save and return the parser
         self.parser = parser
-        return parser.parse_args()
+        return parser.parse_args(args)
 
     def print_options(self, opt):
         """Print and save options
@@ -230,8 +230,8 @@ class BaseOptions:
             comment = ""
             default = self.parser.get_default(k)
             if v != default:
-                comment = "\t[default: %s]" % str(default)
-            message += "{:>25}: {:<30}{}\n".format(str(k), str(v), comment)
+                comment = f"\t[default: {default}]"
+            message += f"{k:>25}: {v:<30}{comment}\n"
         message += "----------------- End -------------------"
         print(message)
 
@@ -243,9 +243,9 @@ class BaseOptions:
             opt_file.write(message)
             opt_file.write("\n")
 
-    def parse(self):
+    def parse(self, args=None):
         """Parse our options, create checkpoints directory suffix, and set up gpu device."""
-        opt = self.gather_options()
+        opt = self.gather_options(args)
         opt.isTrain = self.isTrain  # train or test
 
         # process opt.suffix

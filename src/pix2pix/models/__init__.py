@@ -24,14 +24,14 @@ from .base_model import BaseModel
 
 
 def find_model_using_name(model_name):
-    """Import the module "models/[model_name]_model.py".
+    """Import the module "[model_name]_model.py".
 
     In the file, the class called DatasetNameModel() will
     be instantiated. It has to be a subclass of BaseModel,
     and it is case-insensitive.
     """
-    model_filename = "models." + model_name + "_model"
-    modellib = importlib.import_module(model_filename)
+    model_filename = f".{model_name}_model"
+    modellib = importlib.import_module(model_filename, package=__name__)
     model = None
     target_model_name = model_name.replace("_", "") + "model"
     for name, cls in modellib.__dict__.items():
